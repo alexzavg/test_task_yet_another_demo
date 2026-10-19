@@ -1,0 +1,23 @@
+node_modules
+dist
+.DS_Store
+*.log
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+smart-report/
+playwright/.cache/
+
+# Claude Code
+.claude/
+.playwright-cli/
+.confluence-page.xhtml
+
+# QA deliverables (test cases, bug reports, evidence) stay local
+documentation/
+
+# Environment files
+.env
+.env.*
