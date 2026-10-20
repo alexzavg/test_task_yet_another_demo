@@ -12,6 +12,8 @@ const isCI = !!process.env.CI
 
 export default defineConfig({
   testDir: './tests',
+  // CI keeps media inside the published report folder, so its video links resolve on GitHub Pages
+  outputDir: isCI ? 'smart-report/test-results' : 'test-results',
   fullyParallel: isCI,
   workers: isCI ? 4 : 1,
   retries: isCI ? 2 : 0,

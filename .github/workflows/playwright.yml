@@ -3,7 +3,16 @@ name: Playwright Tests
 on:
   push:
     branches-ignore: [gh-pages]
+  schedule:
+    - cron: '0 9 * * 1-5'
+      timezone: Asia/Tbilisi
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Test tag to run (utils/tags.ts)
+        type: choice
+        options: ['@smoke', '@regression', '@signup']
+        default: '@regression'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -73,8 +82,17 @@ jobs:
       - name: Build app
         run: npm run build
 
+      - name: Restore report history from gh-pages
+        run: |
+          mkdir -p smart-report
+          if git fetch --depth=1 origin gh-pages; then
+            git show FETCH_HEAD:test-history.json > smart-report/test-history.json || rm -f smart-report/test-history.json
+          fi
+
       - name: Run Playwright tests
-        run: npm test
+        run: npm test -- --grep "$TEST_TAG"
+        env:
+          TEST_TAG: ${{ inputs.tag || '@regression' }}
 
       - name: Publish report to GitHub Pages
         if: ${{ !cancelled() && hashFiles('smart-report/index.html') != '' }}
