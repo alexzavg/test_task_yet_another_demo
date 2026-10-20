@@ -8,11 +8,13 @@ dotenv.config({ path: `.env.${testEnv}`, override: true, quiet: true })
 const BASE_URL = process.env.BASE_URL
 if (!BASE_URL) throw new Error(`BASE_URL is not set: add it to .env.${testEnv}`)
 
+const isCI = !!process.env.CI
+
 export default defineConfig({
   testDir: './tests',
-  fullyParallel: false,
-  workers: 1,
-  retries: 0,
+  fullyParallel: isCI,
+  workers: isCI ? 4 : 1,
+  retries: isCI ? 2 : 0,
   reporter: [
     ['list'],
     // smart-reporter resolves paths from testDir, hence the '../'
@@ -31,8 +33,9 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  // CI serves the production build (`npm run build` runs first) on the BASE_URL port
   webServer: {
-    command: 'npm run dev',
+    command: isCI ? `npm run preview -- --port ${new URL(BASE_URL).port} --strictPort` : 'npm run dev',
     url: BASE_URL,
     reuseExistingServer: true,
   },
