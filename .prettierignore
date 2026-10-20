@@ -1,9 +1,12 @@
-# .gitignore is applied too: node_modules, dist, reports, .claude/ and documentation/ are already skipped
+# .gitignore is applied too: node_modules, dist, reports and .claude/ are already skipped
 
 # App under test: QA tooling never reformats it
 src/
 public/
 index.html
 vite.config.js
+
+# QA deliverables keep the layout the QA skills write
+documentation/
 
 package-lock.json
