@@ -3,9 +3,9 @@ name: Playwright Tests
 on:
   push:
     branches-ignore: [gh-pages]
-  schedule:
-    - cron: '0 9 * * 1-5'
-      timezone: Asia/Tbilisi
+  # schedule:
+  #  - cron: '0 9 * * 1-5'
+  #    timezone: Asia/Tbilisi
   workflow_dispatch:
     inputs:
       tag:
@@ -95,6 +95,7 @@ jobs:
         run: npm test -- --grep "$TEST_TAG"
         env:
           TEST_TAG: ${{ inputs.tag || '@regression' }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_KEY }}
 
       - name: Publish report to GitHub Pages
         if: ${{ !cancelled() && hashFiles('smart-report/index.html') != '' }}
