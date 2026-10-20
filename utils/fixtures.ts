@@ -1,10 +1,15 @@
 import { test as base } from '@playwright/test'
-import { PageManager } from './pageManager.js'
+import { PageManager } from './pageManager'
 
 // Name of the attachment mirroring the annotations into the trace
 const attachmentName = 'test deliverables'
 
-export const test = base.extend({
+type Fixtures = {
+  pageManager: PageManager
+  annotations: Record<string, unknown>
+}
+
+export const test = base.extend<Fixtures>({
   pageManager: async ({ page }, use) => {
     await use(new PageManager(page))
   },
@@ -14,11 +19,11 @@ export const test = base.extend({
   // resolved here, on teardown. Teardown runs on pass and on failure, so a failed test still
   // reports everything it got as far as.
   annotations: async ({}, use, testInfo) => {
-    const collected = {}
+    const collected: Record<string, unknown> = {}
     await use(collected)
-    const lines = []
+    const lines: string[] = []
     for (const [type, value] of Object.entries(collected)) {
-      let resolved
+      let resolved: unknown
       try {
         resolved = typeof value === 'function' ? value() : value
       } catch {
@@ -36,4 +41,4 @@ export const test = base.extend({
 })
 
 // Spec-level step: a readable block in the report, trace and UI mode
-export const step = (name, callback) => test.step(name, callback)
+export const step = <T>(name: string, body: () => Promise<T>): Promise<T> => test.step(name, body)

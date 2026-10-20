@@ -1,6 +1,12 @@
 import { defineConfig, devices } from '@playwright/test'
+import dotenv from 'dotenv'
 
-const BASE_URL = 'http://localhost:5173'
+// `test_env` comes from the npm scripts (cross-env) and selects `.env.<test_env>`; without it, `.env.local`
+const testEnv = process.env.test_env ?? 'local'
+dotenv.config({ path: `.env.${testEnv}`, override: true, quiet: true })
+
+const BASE_URL = process.env.BASE_URL
+if (!BASE_URL) throw new Error(`BASE_URL is not set: add it to .env.${testEnv}`)
 
 export default defineConfig({
   testDir: './tests',

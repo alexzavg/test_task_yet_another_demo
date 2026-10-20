@@ -20,4 +20,4 @@ documentation/
 
 # Environment files
 .env
-.env.*
+#.env.*
