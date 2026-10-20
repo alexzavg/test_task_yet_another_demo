@@ -16,10 +16,13 @@ export default defineConfig({
   reporter: [
     ['list'],
     // smart-reporter resolves paths from testDir, hence the '../'
-    ['playwright-smart-reporter', {
-      outputFile: '../smart-report/index.html',
-      historyFile: '../smart-report/test-history.json',
-    }],
+    [
+      'playwright-smart-reporter',
+      {
+        outputFile: '../smart-report/index.html',
+        historyFile: '../smart-report/test-history.json',
+      },
+    ],
   ],
   use: {
     baseURL: BASE_URL,
@@ -27,9 +30,7 @@ export default defineConfig({
     video: 'retain-on-failure',
     trace: 'retain-on-failure',
   },
-  projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-  ],
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
     command: 'npm run dev',
     url: BASE_URL,

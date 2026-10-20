@@ -40,11 +40,7 @@ export class SignupPageLocators {
   }
 
   heroStatValue(label: string): Locator {
-    return this.hero
-      .getByRole('listitem')
-      .filter({ hasText: label })
-      .locator('strong')
-      .describe(`${label} stat value`)
+    return this.hero.getByRole('listitem').filter({ hasText: label }).locator('strong').describe(`${label} stat value`)
   }
 
   get heroLead(): Locator {
@@ -238,6 +234,8 @@ export class SignupPageLocators {
   }
 
   get signUpSomeoneElseButton(): Locator {
-    return this.confirmation.getByRole('button', { name: 'Sign up someone else' }).describe('Sign up someone else button')
+    return this.confirmation
+      .getByRole('button', { name: 'Sign up someone else' })
+      .describe('Sign up someone else button')
   }
 }

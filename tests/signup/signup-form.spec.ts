@@ -65,15 +65,11 @@ test.describe('Signup Form - Free Pass', () => {
     },
   )
 
-  test(
-    'The signup form loads in its default state',
-    { tag: [tags.SMOKE, tags.SIGNUP] },
-    async ({ pageManager }) => {
-      await step('Verify every field, choice and the consent checkbox show their defaults with no errors', async () => {
-        await pageManager.signupPage.verifyDefaultFormState(defaultFormState)
-      })
-    },
-  )
+  test('The signup form loads in its default state', { tag: [tags.SMOKE, tags.SIGNUP] }, async ({ pageManager }) => {
+    await step('Verify every field, choice and the consent checkbox show their defaults with no errors', async () => {
+      await pageManager.signupPage.verifyDefaultFormState(defaultFormState)
+    })
+  })
 
   test(
     'The home club select lists the five clubs in order and the placeholder cannot be chosen',
@@ -201,10 +197,13 @@ test.describe('Signup Form - Free Pass', () => {
         await pageManager.signupPage.pressKey('Space')
       })
 
-      await step('Tab to the experience level and move from Beginner to Intermediate with the Right arrow key', async () => {
-        await pageManager.signupPage.tabToSelectedLevel()
-        await pageManager.signupPage.pressKey('ArrowRight')
-      })
+      await step(
+        'Tab to the experience level and move from Beginner to Intermediate with the Right arrow key',
+        async () => {
+          await pageManager.signupPage.tabToSelectedLevel()
+          await pageManager.signupPage.pressKey('ArrowRight')
+        },
+      )
 
       await step('Tab to the consent checkbox and check it with Space', async () => {
         await pageManager.signupPage.tabToConsent()
@@ -260,42 +259,41 @@ test.describe('Signup Form - Free Pass', () => {
         await pageManager.signupPage.verifyFocusIndicatorVisible()
       })
 
-      await step('Tab through the consent checkbox, its links and the submit button, each showing a focus indicator', async () => {
-        await pageManager.signupPage.tabToConsent()
-        await pageManager.signupPage.verifyFocusIndicatorVisible()
-        for (const name of Object.values(consentLinks)) {
-          await pageManager.signupPage.tabToConsentLink(name)
+      await step(
+        'Tab through the consent checkbox, its links and the submit button, each showing a focus indicator',
+        async () => {
+          await pageManager.signupPage.tabToConsent()
           await pageManager.signupPage.verifyFocusIndicatorVisible()
-        }
-        await pageManager.signupPage.tabToSubmit()
-        await pageManager.signupPage.verifyFocusIndicatorVisible()
-      })
+          for (const name of Object.values(consentLinks)) {
+            await pageManager.signupPage.tabToConsentLink(name)
+            await pageManager.signupPage.verifyFocusIndicatorVisible()
+          }
+          await pageManager.signupPage.tabToSubmit()
+          await pageManager.signupPage.verifyFocusIndicatorVisible()
+        },
+      )
     },
   )
 
-  test(
-    'Shift+Tab moves keyboard focus backwards',
-    { tag: [tags.REGRESSION, tags.SIGNUP] },
-    async ({ pageManager }) => {
-      const member = pageManager.dataGenerator.generateMember()
+  test('Shift+Tab moves keyboard focus backwards', { tag: [tags.REGRESSION, tags.SIGNUP] }, async ({ pageManager }) => {
+    const member = pageManager.dataGenerator.generateMember()
 
-      await step('Tab to the name and email fields and type the member details', async () => {
-        await pageManager.signupPage.tabToField(fieldLabels.firstName)
-        await pageManager.signupPage.typeWithKeyboard(member.firstName)
-        await pageManager.signupPage.tabToField(fieldLabels.lastName)
-        await pageManager.signupPage.typeWithKeyboard(member.lastName)
-        await pageManager.signupPage.tabToField(fieldLabels.email)
-        await pageManager.signupPage.typeWithKeyboard(member.email)
-      })
+    await step('Tab to the name and email fields and type the member details', async () => {
+      await pageManager.signupPage.tabToField(fieldLabels.firstName)
+      await pageManager.signupPage.typeWithKeyboard(member.firstName)
+      await pageManager.signupPage.tabToField(fieldLabels.lastName)
+      await pageManager.signupPage.typeWithKeyboard(member.lastName)
+      await pageManager.signupPage.tabToField(fieldLabels.email)
+      await pageManager.signupPage.typeWithKeyboard(member.email)
+    })
 
-      await step('Press Shift+Tab', async () => {
-        await pageManager.signupPage.pressKey('Shift+Tab')
-      })
+    await step('Press Shift+Tab', async () => {
+      await pageManager.signupPage.pressKey('Shift+Tab')
+    })
 
-      await step('Verify focus is back in the Last name field with a visible focus indicator', async () => {
-        await pageManager.signupPage.verifyFieldFocused(fieldLabels.lastName)
-        await pageManager.signupPage.verifyFocusIndicatorVisible()
-      })
-    },
-  )
+    await step('Verify focus is back in the Last name field with a visible focus indicator', async () => {
+      await pageManager.signupPage.verifyFieldFocused(fieldLabels.lastName)
+      await pageManager.signupPage.verifyFocusIndicatorVisible()
+    })
+  })
 })

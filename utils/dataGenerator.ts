@@ -5,8 +5,7 @@ export type Member = {
   phone: string
 }
 
-const randomDigits = (length: number): string =>
-  Array.from({ length }, () => Math.floor(Math.random() * 10)).join('')
+const randomDigits = (length: number): string => Array.from({ length }, () => Math.floor(Math.random() * 10)).join('')
 
 export class DataGenerator {
   generateMember(): Member {

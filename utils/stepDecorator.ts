@@ -51,6 +51,11 @@ function parameterNames(method: Function): string[] {
   if (!match) return []
   return match[1]
     .split(',')
-    .map((param) => param.split('=')[0].trim().replace(/^\.\.\./, ''))
+    .map((param) =>
+      param
+        .split('=')[0]
+        .trim()
+        .replace(/^\.\.\./, ''),
+    )
     .filter(Boolean)
 }

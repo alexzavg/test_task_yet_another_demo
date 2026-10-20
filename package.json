@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "test": "cross-env test_env=local playwright test",
     "test:ui": "cross-env test_env=local playwright test --ui",
-    "test:report": "playwright-smart-reporter-serve smart-report/index.html"
+    "test:report": "playwright-smart-reporter-serve smart-report/index.html",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "react": "^19.3.1",
@@ -23,6 +25,7 @@
     "cross-env": "^10.1.0",
     "dotenv": "^18.0.8",
     "playwright-smart-reporter": "^3.0.0",
+    "prettier": "3.9.9",
     "vite": "^8.3.4"
   }
 }

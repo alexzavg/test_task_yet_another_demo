@@ -154,7 +154,8 @@ export class SignupPage extends PageActions {
       classes.map((name) => name.toUpperCase()),
       { useInnerText: true },
     )
-    const readTransform = () => this.locators.classTickerTrack.evaluate((element) => getComputedStyle(element).transform)
+    const readTransform = () =>
+      this.locators.classTickerTrack.evaluate((element) => getComputedStyle(element).transform)
     const start = await readTransform()
     await expect.poll(readTransform).not.toBe(start)
   }
