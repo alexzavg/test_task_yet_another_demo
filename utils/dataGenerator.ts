@@ -1,9 +1,14 @@
-const randomDigits = (length) =>
-  Array.from({ length }, () => Math.floor(Math.random() * 10)).join('')
+export type Member = {
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+}
+
+const randomDigits = (length: number): string => Array.from({ length }, () => Math.floor(Math.random() * 10)).join('')
 
 export class DataGenerator {
-  // Unique per call, so parallel runs never share an identity
-  generateMember() {
+  generateMember(): Member {
     const suffix = `${Date.now()}${randomDigits(4)}`
     return {
       firstName: 'Avery',

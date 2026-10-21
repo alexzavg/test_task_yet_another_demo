@@ -15,9 +15,9 @@ playwright/.cache/
 .playwright-cli/
 .confluence-page.xhtml
 
-# QA deliverables (test cases, bug reports, evidence) stay local
-documentation/
+# QA deliverables (test cases, bug reports, evidence) are committed; uncomment to keep them local
+#documentation/
 
 # Environment files
 .env
-.env.*
+#.env.*

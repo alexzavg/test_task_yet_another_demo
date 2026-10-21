@@ -7,4 +7,4 @@ export const tags = {
   SMOKE: '@smoke',
   REGRESSION: '@regression',
   SIGNUP: '@signup',
-}
+} as const

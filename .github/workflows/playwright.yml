@@ -1,0 +1,162 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches-ignore: [gh-pages]
+  # schedule:
+  #  - cron: '0 9 * * 1-5'
+  #    timezone: Asia/Tbilisi
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Test tag to run (utils/tags.ts)
+        type: choice
+        options: ['@smoke', '@regression', '@signup']
+        default: '@regression'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 24
+
+jobs:
+  test:
+    name: Run tests (shard ${{ matrix.shard }}/${{ strategy.job-total }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore node_modules cache
+        id: node-modules-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Save node_modules cache
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: node_modules
+          key: ${{ steps.node-modules-cache.outputs.cache-primary-key }}
+
+      - name: Read Playwright version
+        id: playwright-version
+        run: echo "version=$(npx playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Playwright browsers cache
+        id: playwright-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps --only-shell chromium
+
+      - name: Save Playwright browsers cache
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ steps.playwright-cache.outputs.cache-primary-key }}
+
+      - name: Build app
+        run: npm run build
+
+      - name: Run Playwright tests
+        run: npm test -- --grep "$TEST_TAG" --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+        env:
+          TEST_TAG: ${{ inputs.tag || '@regression' }}
+
+      - name: Upload blob report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: blob-report-${{ matrix.shard }}
+          path: blob-report
+          retention-days: 1
+
+  report:
+    name: Merge shard reports, publish report
+    needs: test
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore node_modules cache
+        id: node-modules-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Restore report history from gh-pages
+        run: |
+          mkdir -p smart-report
+          if git fetch --depth=1 origin gh-pages; then
+            git show FETCH_HEAD:test-history.json > smart-report/test-history.json || rm -f smart-report/test-history.json
+          fi
+
+      # Inside smart-report/, so the attachments the merge extracts publish next to the report
+      - name: Download shard blob reports
+        uses: actions/download-artifact@v8
+        with:
+          pattern: blob-report-*
+          path: smart-report/blob-report
+          merge-multiple: true
+
+      - name: Merge blob reports into one smart report
+        run: npx playwright merge-reports --config merge.config.ts smart-report/blob-report
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_KEY }}
+
+      - name: Remove merged blob archives, keep attachments
+        if: ${{ !cancelled() }}
+        run: rm -f smart-report/blob-report/*.zip smart-report/blob-report/*.jsonl
+
+      - name: Publish report to GitHub Pages
+        if: ${{ !cancelled() && hashFiles('smart-report/index.html') != '' }}
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: smart-report
+          force_orphan: true
+          full_commit_message: 'Playwright report: ${{ github.ref_name }}@${{ github.sha }} (run ${{ github.run_id }})'
+
+      - name: Link report in job summary
+        if: ${{ !cancelled() && hashFiles('smart-report/index.html') != '' }}
+        run: echo "### [Playwright report](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/)" >> "$GITHUB_STEP_SUMMARY"
