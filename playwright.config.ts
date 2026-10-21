@@ -25,7 +25,7 @@ export default defineConfig({
   outputDir: 'test-results',
   fullyParallel: isCI,
   workers: isCI ? 4 : 1,
-  retries: isCI ? 2 : 0,
+  retries: isCI ? 1 : 0,
   // Each CI shard writes a blob report; the report job merges them into one smart report
   reporter: isCI ? [['list'], ['blob']] : [['list'], smartReporter],
   use: {
