@@ -10,5 +10,5 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["playwright.config.ts", "pages", "locators", "components", "utils", "data", "tests"]
+  "include": ["playwright.config.ts", "merge.config.ts", "pages", "locators", "components", "utils", "data", "tests"]
 }
